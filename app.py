@@ -5,12 +5,11 @@ import base64
 import io  
 from dash.exceptions import PreventUpdate  
 from dash import dash_table  
-from sklearn.linear_model import LogisticRegression  
-import plotly.express as px  
-import xgboost as xgb  
+import numpy as np  
   
 # Initialize the Dash app  
 app = dash.Dash(__name__)  
+server = app.server  # Add this line to deploy on Render or similar services  
   
 # Siemens colors  
 SIEMENS_BLUE = '#009999'  
@@ -39,14 +38,11 @@ app.layout = html.Div(style={'backgroundColor': BG_COLOR, 'padding': '20px'}, ch
     ])  
 ])  
   
-# Dummy ML Prediction function  
+# Dummy ML Prediction function (replace this with your model)  
 def run_dummy_ml(df):  
-    # For demonstration: Let's assume we predict randomly  
-    import numpy as np  
     df['Predicted Outcome'] = np.random.choice(['Win', 'Loss'], size=len(df))  
     return df  
   
-# Callback to handle uploaded file and run ML  
 @app.callback(  
     Output('output-data-upload', 'children'),  
     Output('loading-output', 'children'),  
@@ -95,10 +91,10 @@ def update_output(content, filename):
         }  
     )  
   
-    # Display preview of the predictions in Dash Table  
-    table_preview = dash_table.DataTable(  
-        df_result.head(10).to_dict('records'),  
-        [{"name": i, "id": i} for i in df_result.columns],  
+    # Result preview table  
+    table_preview = dash.dash_table.DataTable(  
+        data=df_result.head(10).to_dict('records'),  
+        columns=[{"name": i, "id": i} for i in df_result.columns],  
         style_header={'backgroundColor': SIEMENS_BLUE, 'color':'white'},  
         style_cell={'textAlign':'center', 'fontFamily':'Arial'},  
         page_size=10,  
